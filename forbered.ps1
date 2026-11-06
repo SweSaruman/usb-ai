@@ -52,7 +52,7 @@ function New-Summor {
     $rader = Get-ChildItem -Path $Rot -Recurse -File |
         Where-Object { $_.Name -ne 'SHA256SUMS.txt' -and $_.FullName -notmatch '[\\/]\.git([\\/]|$)' } |
         ForEach-Object {
-            $rel = [IO.Path]::GetRelativePath($Rot, $_.FullName) -replace '\\', '/'
+            $rel = ($_.FullName.Substring($Rot.Length).TrimStart('\','/')) -replace '\\', '/'
             '{0}  {1}' -f (Get-FilSha256 $_.FullName), $rel
         }
     Set-Content -Path $SummFil -Value $rader -Encoding ascii
