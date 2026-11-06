@@ -122,15 +122,18 @@ $def = $ModellDefinitioner[$Modell]
 $modellKatalog = Join-Path $Rot 'models'
 New-Item -ItemType Directory -Force -Path $modellKatalog | Out-Null
 $modellFil = Join-Path $modellKatalog $def.Fil
-Save-Nedladdning -Url "https://huggingface.co/$($def.Repo)/resolve/main/$($def.Fil)" -Mal $modellFil
-
 $vantad = Get-UtgivarensModellSha256 -Repo $def.Repo -Fil $def.Fil
-$faktisk = Get-FilSha256 $modellFil
-if ($vantad -ne $faktisk) {
-    Remove-Item $modellFil -Force
-    throw "SHA256 stammer inte for modellen. Nedladdningen togs bort."
+if ((Test-Path $modellFil) -and ((Get-FilSha256 $modellFil) -eq $vantad)) {
+    Write-Host 'Modellen finns redan och ar verifierad mot utgivarens SHA256.'
+} else {
+    Save-Nedladdning -Url "https://huggingface.co/$($def.Repo)/resolve/main/$($def.Fil)" -Mal $modellFil
+    $faktisk = Get-FilSha256 $modellFil
+    if ($vantad -ne $faktisk) {
+        Remove-Item $modellFil -Force
+        throw "SHA256 stammer inte for modellen. Nedladdningen togs bort."
+    }
+    Write-Host 'Modellen verifierad mot utgivarens SHA256.'
 }
-Write-Host 'Modellen verifierad mot utgivarens SHA256.'
 
 Test-Sjalvtest
 
