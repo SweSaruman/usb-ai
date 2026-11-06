@@ -10,7 +10,7 @@ $Rot = $PSScriptRoot
 $SummFil = Join-Path $Rot 'SHA256SUMS.txt'
 
 $ModellDefinitioner = @{
-    gemma = @{ Repo = 'ggml-org/gemma-3n-E4B-it-GGUF'; Fil = 'gemma-3n-E4B-it-Q4_K_M.gguf' }
+    gemma = @{ Repo = 'unsloth/gemma-3n-E4B-it-GGUF'; Fil = 'gemma-3n-E4B-it-Q4_K_M.gguf' }
     qwen  = @{ Repo = 'ggml-org/Qwen3-4B-GGUF';       Fil = 'Qwen3-4B-Q4_K_M.gguf' }
 }
 
@@ -70,17 +70,22 @@ function Get-UtgivarensModellSha256 {
     $trad = Invoke-RestMethod -Uri "https://huggingface.co/api/models/$Repo/tree/main" -UserAgent 'usb-ai'
     $post = $trad | Where-Object { $_.path -eq $Fil } | Select-Object -First 1
     if (-not $post) { throw "Hittade inte $Fil hos $Repo." }
+    if ($post.lfs) { return $post.lfs.oid }
     return $post.oid
 }
 
 function Installera-LlamaCpp {
-    $utgivning = Invoke-RestMethod -Uri 'https://api.github.com/repos/ggml-org/llama.cpp/releases/latest' -UserAgent 'usb-ai'
+    $utgivningar = Invoke-RestMethod -Uri 'https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=30' -UserAgent 'usb-ai'
     foreach ($arkiv in @(
         @{ Monster = '*bin-win-cpu-x64.zip';  Katalog = 'bin\win-x64' },
         @{ Monster = '*bin-win-cpu-arm64.zip'; Katalog = 'bin\win-arm64' }
     )) {
-        $tillgang = $utgivning.assets | Where-Object name -like $arkiv.Monster | Select-Object -First 1
-        if (-not $tillgang) { throw "Hittade inte $($arkiv.Monster) i senaste llama.cpp-utgivningen." }
+        $tillgang = $null
+        foreach ($utgivning in $utgivningar) {
+            $tillgang = $utgivning.assets | Where-Object name -like $arkiv.Monster | Select-Object -First 1
+            if ($tillgang) { break }
+        }
+        if (-not $tillgang) { throw "Hittade inte $($arkiv.Monster) bland llama.cpp:s senaste utgivningar." }
         $zip = Join-Path $env:TEMP $tillgang.name
         Save-Nedladdning -Url $tillgang.browser_download_url -Mal $zip
         $malKatalog = Join-Path $Rot $arkiv.Katalog
