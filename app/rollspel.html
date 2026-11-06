@@ -70,6 +70,37 @@
     cursor: pointer;
   }
   button:disabled { opacity: 0.5; cursor: wait; }
+  #val {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.5rem 0.7rem;
+    background: #efe9dc;
+  }
+  #val:empty { display: none; }
+  #val button {
+    background: #ffffff;
+    color: #2f3b2f;
+    border: 1px solid #2f3b2f;
+    padding: 0.35rem 0.8rem;
+  }
+  #tarningrad {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.7rem;
+    background: #efe9dc;
+    border-top: 1px solid #d8d2c2;
+  }
+  #tarningrad button { padding: 0.35rem 0.9rem; }
+  #vikter { font-size: 0.8rem; opacity: 0.75; }
+  .meddelande.tarning {
+    align-self: center;
+    background: #f3e9c9;
+    border: 1px dashed #b89b3e;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -81,6 +112,21 @@
   <span id="status"></span>
 </header>
 <div id="chat"></div>
+<div id="val"></div>
+<div id="tarningrad">
+  <label>Tärning
+    <select id="tarningval">
+      <option value="4">T4</option>
+      <option value="6">T6</option>
+      <option value="8">T8</option>
+      <option value="10">T10</option>
+      <option value="12">T12</option>
+      <option value="20" selected>T20</option>
+    </select>
+  </label>
+  <button id="slaTarning" type="button">Slå tärning</button>
+  <span id="vikter"></span>
+</div>
 <form id="form">
   <textarea id="input" placeholder="Vad gör du?" autofocus></textarea>
   <button id="skicka" type="submit">Skicka</button>
@@ -95,7 +141,12 @@
   var status = document.getElementById('status');
   var input = document.getElementById('input');
   var skicka = document.getElementById('skicka');
+  var tarningVal = document.getElementById('tarningval');
+  var slaTarning = document.getElementById('slaTarning');
+  var valRad = document.getElementById('val');
+  var vikter = document.getElementById('vikter');
   var historik = [];
+  var senasteVal = [];
 
   scenarier.forEach(function (s) {
     var alt = document.createElement('option');
@@ -112,6 +163,92 @@
     chat.scrollTop = chat.scrollHeight;
   }
 
+  function slumpSlag(sidor) {
+    var grans = Math.floor(256 / sidor) * sidor;
+    var buf = new Uint8Array(1);
+    do {
+      crypto.getRandomValues(buf);
+    } while (buf[0] >= grans);
+    return 1 + (buf[0] % sidor);
+  }
+
+  function parsaVal(text) {
+    var rader = text.split('\n');
+    var start = -1;
+    var rest = '';
+    for (var i = rader.length - 1; i >= 0; i--) {
+      var m = rader[i].match(/val\s*:/i);
+      if (m) { start = i; rest = rader[i].slice(m.index + m[0].length); break; }
+    }
+    if (start < 0) return [];
+    var alla = [rest].concat(rader.slice(start + 1));
+    var val = [];
+    for (var j = 0; j < alla.length; j++) {
+      var rad = alla[j];
+      var mn = rad.match(/^\s*(\d+)[.)]\s*(.+?)\s*$/);
+      var mb = rad.match(/^\s*[-*•]\s*(.+?)\s*$/);
+      if (mn) {
+        val.push({ nr: Number(mn[1]), text: mn[2] });
+      } else if (mb) {
+        val.push({ nr: val.length + 1, text: mb[1] });
+      } else if (val.length > 0 && rad.trim() !== '') {
+        break;
+      }
+    }
+    return val;
+  }
+
+  function fordelning(sidor, antal) {
+    var bas = Math.floor(sidor / antal);
+    var rest = sidor % antal;
+    var spann = [];
+    var start = 1;
+    for (var i = 0; i < antal; i++) {
+      var storlek = bas + (i < rest ? 1 : 0);
+      spann.push({ start: start, slut: start + storlek - 1 });
+      start += storlek;
+    }
+    return spann;
+  }
+
+  function spannText(r) {
+    return r.start === r.slut ? String(r.start) : r.start + '–' + r.slut;
+  }
+
+  function valIndex(slag, spann) {
+    for (var i = 0; i < spann.length; i++) {
+      if (slag <= spann[i].slut) return i;
+    }
+    return spann.length - 1;
+  }
+
+  function uppdateraVikter() {
+    if (senasteVal.length === 0) {
+      vikter.textContent = '';
+      return;
+    }
+    var spann = fordelning(Number(tarningVal.value), senasteVal.length);
+    vikter.textContent = 'T' + tarningVal.value + ' viktning: ' +
+      spann.map(spannText).join(' · ');
+  }
+
+  function visaVal(val) {
+    senasteVal = val;
+    valRad.textContent = '';
+    val.forEach(function (v) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = v.nr + ') ' + v.text;
+      b.addEventListener('click', function () { valjDirekt(v); });
+      valRad.appendChild(b);
+    });
+    uppdateraVikter();
+  }
+
+  function valjDirekt(v) {
+    skickaText('Jag väljer alternativ ' + v.nr + ': ' + v.text);
+  }
+
   function startaScenario() {
     var s = scenarier.find(function (x) { return x.id === val.value; });
     if (!s) return;
@@ -119,6 +256,7 @@
     historik = [];
     visa(s.beskrivning, 'berattare');
     visa(s.uppstart, 'berattare');
+    visaVal([]);
     window.aktivtScenario = s;
     status.textContent = s.titel;
   }
@@ -142,17 +280,16 @@
     visa('Kunde inte nå modellen på 127.0.0.1:8080. Kontrollera att start.bat körs.', 'berattare');
   });
 
-  document.getElementById('form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var text = input.value.trim();
+  function skickaText(text) {
     if (!text || skicka.disabled) return;
-    input.value = '';
+    visaVal([]);
     visa(text, 'spelare');
     historik.push({ role: 'user', content: text });
     skicka.disabled = true;
 
     var systemText = window.aktivtScenario.systemPrompt +
-      '\n\nSpelets uppstart: ' + window.aktivtScenario.uppstart;
+      '\n\nSpelets uppstart: ' + window.aktivtScenario.uppstart +
+      '\n\nAvsluta alltid ditt svar med en rad "Val:" följt av 2-4 numrerade alternativ på egna rader ("1) ...", "2) ..."). Inget får stå efter alternativlistan.';
     var meddelanden = [{ role: 'system', content: systemText }].concat(historik);
     fetch('/v1/chat/completions', {
       method: 'POST',
@@ -171,13 +308,39 @@
         ? svar.choices[0].message.content : '(tomt svar)';
       visa(innehall, 'berattare');
       historik.push({ role: 'assistant', content: innehall });
+      visaVal(parsaVal(innehall));
     }).catch(function () {
       visa('Modellen svarade inte. Försök igen.', 'berattare');
     }).finally(function () {
       skicka.disabled = false;
       input.focus();
     });
+  }
+
+  document.getElementById('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var text = input.value.trim();
+    input.value = '';
+    skickaText(text);
   });
+
+  slaTarning.addEventListener('click', function () {
+    if (skicka.disabled) return;
+    var sidor = Number(tarningVal.value) || 20;
+    var slag = slumpSlag(sidor);
+    if (senasteVal.length > 0) {
+      var spann = fordelning(sidor, senasteVal.length);
+      var idx = valIndex(slag, spann);
+      var v = senasteVal[idx];
+      visa('🎲 T' + sidor + ' = ' + slag + ' → alternativ ' + v.nr + ' (' + spannText(spann[idx]) + '): ' + v.text, 'tarning');
+      skickaText('Jag slår en T' + sidor + ' och får ' + slag + ', vilket ger alternativ ' + v.nr + ': ' + v.text);
+    } else {
+      visa('🎲 T' + sidor + ' = ' + slag, 'tarning');
+      skickaText('Jag slår en T' + sidor + ' och får ' + slag + '. Låt slaget avgöra vad som händer härnäst.');
+    }
+  });
+
+  tarningVal.addEventListener('change', uppdateraVikter);
 
   val.addEventListener('change', startaScenario);
 </script>

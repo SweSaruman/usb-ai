@@ -16,6 +16,10 @@ Görs en gång av IT eller ansvarig, med internetuppkoppling:
 
 Dubbelklicka på `start.bat`. Filerna kontrolleras, modellen läses in och rollspelet öppnas i webbläsaren på `http://127.0.0.1:8080/rollspel.html`.
 
+### Tärningar och val
+
+Berättaren avslutar varje svar med numrerade val. Klicka på ett val för att välja det direkt, eller välj en tärning (T4, T6, T8, T10, T12 eller T20) och tryck på "Slå tärning" – tärningens sidor fördelas över valen, så olika tärningar viktar valen olika (vikterna visas i gränssnittet). Slaget slås lokalt med kryptografiskt säker slump, helt utan nätverkstrafik, och skickas sedan till modellen tillsammans med det valda alternativet.
+
 ## Kontrollera stickan
 
 `verifiera.bat` kontrollerar alla filer, inklusive modellen, mot `SHA256SUMS.txt`.
