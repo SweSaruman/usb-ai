@@ -20,6 +20,10 @@ Dubbelklicka på `start.bat`. Filerna kontrolleras, modellen läses in och rolls
 
 Berättaren avslutar varje svar med numrerade val. Klicka på ett val för att välja det direkt, eller välj en tärning (T4, T6, T8, T10, T12 eller T20) och tryck på "Slå tärning" – tärningens sidor fördelas över valen, så olika tärningar viktar valen olika (vikterna visas i gränssnittet). Slaget slås lokalt med kryptografiskt säker slump, helt utan nätverkstrafik, och skickas sedan till modellen tillsammans med det valda alternativet.
 
+### Bilder
+
+Varje scenario kan visa en bild när det startar (`bild` i `scenarier.js`) och en bild första gången ett nyckelord nämns i berättelsen (`nyckelord`). Bilderna ligger i `app/bilder/` som små SVG-filer (några KB vardera). Bildskapande AI (t.ex. FLUX) är för tungt för ett USB-minne och ingår inte — men egna SVG/PNG-bilder går bra att lägga in där, håll dem små. Kom ihåg `forbered.bat summor` efter ändringar i `app/`.
+
 ## Kontrollera stickan
 
 `verifiera.bat` kontrollerar alla filer, inklusive modellen, mot `SHA256SUMS.txt`.
@@ -35,7 +39,7 @@ Berättaren avslutar varje svar med numrerade val. Klicka på ett val för att v
 | `bin/win-x64` | llama.cpp för Intel/AMD |
 | `bin/win-arm64` | llama.cpp för ARM (t.ex. Snapdragon) |
 | `models/` | Språkmodellen (GGUF) |
-| `app/` | Rollspelet (`rollspel.html`, `scenarier.js`) |
+| `app/` | Rollspelet (`rollspel.html`, `scenarier.js`, `bilder/`) |
 | `SAKERHETSUNDERLAG.md` | Beskrivning för IT-säkerhetsgranskning |
 
 ## Nya scenarier

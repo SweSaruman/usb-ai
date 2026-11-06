@@ -102,6 +102,18 @@
     border: 1px dashed #b89b3e;
     font-weight: 600;
   }
+  .meddelande.bild {
+    align-self: flex-start;
+    padding: 0.3rem;
+    background: #ffffff;
+    border: 1px solid #d8d2c2;
+  }
+  .meddelande.bild img {
+    display: block;
+    max-width: min(420px, 78vw);
+    height: auto;
+    border-radius: 8px;
+  }
 </style>
 </head>
 <body>
@@ -148,6 +160,7 @@
   var vikter = document.getElementById('vikter');
   var historik = [];
   var senasteVal = [];
+  var visadeNyckelord = {};
 
   scenarier.forEach(function (s) {
     var alt = document.createElement('option');
@@ -162,6 +175,30 @@
     ruta.textContent = text;
     chat.appendChild(ruta);
     chat.scrollTop = chat.scrollHeight;
+  }
+
+  function visaBild(url, alt) {
+    var ruta = document.createElement('div');
+    ruta.className = 'meddelande bild';
+    var img = document.createElement('img');
+    img.src = url;
+    img.alt = alt || '';
+    ruta.appendChild(img);
+    chat.appendChild(ruta);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function visaNyckelbilder(text) {
+    var s = window.aktivtScenario;
+    if (!s || !s.nyckelord) return;
+    var t = text.toLowerCase();
+    Object.keys(s.nyckelord).forEach(function (ord) {
+      if (visadeNyckelord[ord]) return;
+      if (t.indexOf(ord.toLowerCase()) >= 0) {
+        visadeNyckelord[ord] = true;
+        visaBild(s.nyckelord[ord], ord);
+      }
+    });
   }
 
   function slumpSlag(sidor) {
@@ -287,6 +324,8 @@
     historik = [];
     visa(s.beskrivning, 'berattare');
     visa(s.uppstart, 'berattare');
+    if (s.bild) visaBild(s.bild, s.titel);
+    visadeNyckelord = {};
     visaVal([]);
     window.aktivtScenario = s;
     status.textContent = s.titel;
@@ -340,6 +379,7 @@
       visa(innehall, 'berattare');
       historik.push({ role: 'assistant', content: innehall });
       visaVal(parsaVal(innehall));
+      visaNyckelbilder(innehall);
     }).catch(function () {
       visa('Modellen svarade inte. Försök igen.', 'berattare');
     }).finally(function () {

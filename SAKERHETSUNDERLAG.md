@@ -15,7 +15,7 @@ usb-ai är en lokal AI-applikation som körs direkt från ett USB-minne på Wind
 | `forbered.bat` / `forbered.ps1` | Engångsförberedelse med internet: laddar ner llama.cpp-binärer och modell, verifierar SHA256, kör självtest, skapar `SHA256SUMS.txt` |
 | `bin/win-x64`, `bin/win-arm64` | llama.cpp (`llama-server.exe`) för respektive arkitektur |
 | `models/` | Språkmodell i GGUF-format |
-| `app/` | Webbgränssnitt (`rollspel.html`) och scenarier (`scenarier.js`) |
+| `app/` | Webbgränssnitt (`rollspel.html`), scenarier (`scenarier.js`) och bilder (`bilder/`) |
 
 ## Nätverk
 

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225">
+  <defs>
+    <linearGradient id="hav" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0e2a3a"/>
+      <stop offset="1" stop-color="#04101c"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="225" fill="url(#hav)"/>
+  <polygon points="200,0 118,225 282,225" fill="#9fd4e8" opacity="0.07"/>
+  <g fill="#9fd4e8" opacity="0.3">
+    <circle cx="90" cy="60" r="3"/>
+    <circle cx="105" cy="40" r="2"/>
+    <circle cx="320" cy="80" r="3"/>
+    <circle cx="335" cy="55" r="2"/>
+    <circle cx="60" cy="150" r="2.5"/>
+    <circle cx="345" cy="160" r="2.5"/>
+  </g>
+  <g>
+    <line x1="165" y1="180" x2="150" y2="205" stroke="#2c3742" stroke-width="6"/>
+    <line x1="235" y1="180" x2="250" y2="205" stroke="#2c3742" stroke-width="6"/>
+    <rect x="150" y="122" width="100" height="60" rx="10" fill="#3d4a56"/>
+    <path d="M150 122 a50 42 0 0 1 100 0 Z" fill="#46586a"/>
+    <line x1="200" y1="80" x2="200" y2="58" stroke="#46586a" stroke-width="4"/>
+    <circle cx="200" cy="54" r="4" fill="#ff6a5a"/>
+  </g>
+  <g fill="#ffd97a">
+    <rect x="162" y="138" width="18" height="14" rx="2"/>
+    <rect x="191" y="138" width="18" height="14" rx="2"/>
+    <rect x="220" y="138" width="18" height="14" rx="2"/>
+  </g>
+  <rect y="205" width="400" height="20" fill="#0a1a14"/>
+  <g stroke="#1e3a2a" stroke-width="4" fill="none">
+    <path d="M40 225 q6 -22 -4 -38"/>
+    <path d="M60 225 q-6 -18 4 -32"/>
+    <path d="M350 225 q6 -20 -4 -34"/>
+    <path d="M368 225 q-5 -16 5 -28"/>
+  </g>
+</svg>
