@@ -151,7 +151,7 @@
   var scenarier = window.SCENARIER || [];
   var val = document.getElementById('scenarieval');
   var chat = document.getElementById('chat');
-  var status = document.getElementById('status');
+  var statusText = document.getElementById('status');
   var input = document.getElementById('input');
   var skicka = document.getElementById('skicka');
   var tarningVal = document.getElementById('tarningval');
@@ -328,7 +328,7 @@
     visadeNyckelord = {};
     visaVal([]);
     window.aktivtScenario = s;
-    status.textContent = s.titel;
+    statusText.textContent = s.titel;
   }
 
   skicka.disabled = true;
@@ -343,10 +343,10 @@
   }).then(function (r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     skicka.disabled = false;
-    status.textContent = 'Ansluten';
+    statusText.textContent = 'Ansluten';
     startaScenario();
   }).catch(function () {
-    status.textContent = 'Ingen kontakt med modellen';
+    statusText.textContent = 'Ingen kontakt med modellen';
     visa('Kunde inte nå modellen på 127.0.0.1:8080. Kontrollera att start.bat körs.', 'berattare');
   });
 
